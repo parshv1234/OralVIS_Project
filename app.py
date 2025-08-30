@@ -98,12 +98,14 @@ if uploaded_file is not None:
     for box in results.boxes:
         class_id = int(box.cls)
         label = model.names[class_id]
+        confidence = float(box.conf)
         x1, y1, x2, y2 = [int(coord) for coord in box.xyxy[0].cpu().numpy()]
         boxes_for_pp.append({
             "coords": (x1, y1, x2, y2),
             "center_x": (x1 + x2) / 2,
             "center_y": (y1 + y2) / 2,
-            "label": label
+            "label": label,
+            "confidence": confidence
         })
 
     # Perform post-processing
@@ -112,7 +114,7 @@ if uploaded_file is not None:
     # Draw and display the final image
     output_image = draw_results(cv2_img.copy(), sorted_quadrants)
     st.header("Analysis Results")
-    st.image(output_image, channels="BGR", caption="Post-processed detections with anatomical sorting.")
+    st.image(output_image, channels="BGR", caption="Post-processed detections with anatomical sorting and confidence scores.")
 
     # Display the sorted list of teeth
     st.header("Detected Teeth (Sorted)")
@@ -122,7 +124,8 @@ if uploaded_file is not None:
             st.subheader(f"Quadrant {i}")
             if sorted_quadrants[i]:
                 for tooth in sorted_quadrants[i]:
-                    st.write(f"- {tooth['label']}")
+                    confidence_percent = int(tooth['confidence'] * 100)
+                    st.write(f"- {tooth['label']} ({confidence_percent}%)")
             else:
                 st.write("No teeth detected.")
 
