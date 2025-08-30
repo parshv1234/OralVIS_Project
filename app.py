@@ -54,12 +54,15 @@ def draw_results(image, sorted_quadrants):
         for i, tooth in enumerate(teeth):
             x1, y1, x2, y2 = tooth['coords']
             cv2.rectangle(image, (x1, y1), (x2, y2), colors[quad_num], 2)
-            label_text = f"Q{quad_num}-{i+1} {tooth['label'].split('(')[0]}"
+            
+            # MODIFIED: Add confidence score to the label text
+            confidence_percent = int(tooth['confidence'] * 100)
+            label_text = f"Q{quad_num}-{i+1} {tooth['label'].split('(')[0]} {confidence_percent}%"
+            
             cv2.putText(image, label_text, (x1, y1 - 10), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, colors[quad_num], 2)
     return image
 
-# --- NEW: Function to generate a text report ---
 def generate_text_report(sorted_quadrants):
     """Generates a formatted string report of the detected teeth."""
     report = "OralVis Analysis Report\n"
@@ -68,7 +71,9 @@ def generate_text_report(sorted_quadrants):
         report += f"--- Quadrant {i} ---\n"
         if sorted_quadrants[i]:
             for tooth in sorted_quadrants[i]:
-                report += f"- {tooth['label']}\n"
+                # MODIFIED: Add confidence score to the text report
+                confidence_percent = int(tooth['confidence'] * 100)
+                report += f"- {tooth['label']} ({confidence_percent}% confidence)\n"
         else:
             report += "No teeth detected in this quadrant.\n"
         report += "\n"
@@ -82,7 +87,6 @@ st.write("Upload a panoramic dental X-ray to detect, classify, and sort teeth us
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
-    # Convert the uploaded file to an OpenCV image
     bytes_data = uploaded_file.getvalue()
     cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
     H, W, _ = cv2_img.shape
@@ -90,33 +94,30 @@ if uploaded_file is not None:
     st.sidebar.header("Original Image")
     st.sidebar.image(cv2_img, channels="BGR", use_column_width=True)
 
-    # Run prediction
     results = model(cv2_img)[0]
     
-    # Extract boxes for post-processing
     boxes_for_pp = []
     for box in results.boxes:
         class_id = int(box.cls)
         label = model.names[class_id]
-        confidence = float(box.conf)
+        confidence = float(box.conf) # MODIFIED: Extract confidence score
         x1, y1, x2, y2 = [int(coord) for coord in box.xyxy[0].cpu().numpy()]
+        
+        # MODIFIED: Add confidence to the dictionary
         boxes_for_pp.append({
             "coords": (x1, y1, x2, y2),
             "center_x": (x1 + x2) / 2,
             "center_y": (y1 + y2) / 2,
             "label": label,
-            "confidence": confidence
+            "confidence": confidence 
         })
 
-    # Perform post-processing
     sorted_quadrants = post_process_predictions(boxes_for_pp, W, H)
 
-    # Draw and display the final image
     output_image = draw_results(cv2_img.copy(), sorted_quadrants)
     st.header("Analysis Results")
     st.image(output_image, channels="BGR", caption="Post-processed detections with anatomical sorting and confidence scores.")
 
-    # Display the sorted list of teeth
     st.header("Detected Teeth (Sorted)")
     cols = st.columns(4)
     for i in range(1, 5):
@@ -124,23 +125,18 @@ if uploaded_file is not None:
             st.subheader(f"Quadrant {i}")
             if sorted_quadrants[i]:
                 for tooth in sorted_quadrants[i]:
+                    # MODIFIED: Display confidence score in the text list
                     confidence_percent = int(tooth['confidence'] * 100)
                     st.write(f"- {tooth['label']} ({confidence_percent}%)")
             else:
                 st.write("No teeth detected.")
 
-    # --- NEW: Download Buttons ---
     st.header("Download Results")
     col1, col2 = st.columns(2)
 
     with col1:
-        # Prepare image for download
-        # Convert from BGR (OpenCV) to RGB for saving
-        output_image_rgb = cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB) 
-        # Encode to a byte buffer
         is_success, buffer = cv2.imencode(".png", output_image)
         byte_im = buffer.tobytes()
-
         st.download_button(
             label="Download Processed Image",
             data=byte_im,
@@ -149,7 +145,6 @@ if uploaded_file is not None:
         )
     
     with col2:
-        # Prepare text report for download
         text_report = generate_text_report(sorted_quadrants)
         st.download_button(
             label="Download Text Report",
