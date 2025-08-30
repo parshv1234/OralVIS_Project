@@ -87,6 +87,17 @@ After training is complete, the final step is to evaluate the best model on the 
 
 This command will output the final metrics and save the test set confusion matrix and sample predictions to a new folder (e.g., `runs/detect/validation_result/`). These are the final results for your report.
 
+---
+## Step 5: Post-Processing
+
+Run the post-processing script on a sample image to see the final refined output.
+```bash
+python3 postprocess.py
+```
+This will generate a `post_processed_result.jpg` file in a new folder `postprocessing`.
+
+---
+
 ## Final Model Performance
 
 The final `YOLOv8m` model achieved the following performance on the test set:
@@ -98,6 +109,4 @@ The final `YOLOv8m` model achieved the following performance on the test set:
 | Precision   | 0.830                |
 | Recall      | 0.881                |
 
-## Future Work: Post-Processing
-
-As a potential future improvement, a post-processing algorithm could be applied to the model's raw output to enforce anatomical correctness. This logic would involve clustering detections into their respective quadrants, sorting them horizontally, and re-assigning FDI labels sequentially. This would not only correct potential classification errors but also allow the system to identify missing teeth by detecting large gaps in the sequence.
+---
