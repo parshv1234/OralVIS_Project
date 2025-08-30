@@ -2,7 +2,7 @@ from ultralytics import YOLO
 
 def main():
     model = YOLO('yolov8m.pt') 
-    # model = YOLO('yolo11m.pt')
+    # model = YOLO('yolo11m.pt') # If you want to test YOLO v11 m model.
     results = model.train(
         data='data.yaml',
         imgsz=640,
@@ -11,7 +11,7 @@ def main():
         device='mps',
         plots=True,
         workers=6,
-        name='oralvis_yolov11m_run2',
+        name='oralvis_yolov8m_run1',
         degrees=10,    
         translate=0.1, 
         scale=0.2, 
