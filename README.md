@@ -1,5 +1,7 @@
 # OralVis: YOLOv8 Tooth Detection and Classification
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://dental-xray-analysis.streamlit.app/)
+
 This repository contains the complete project for the OralVis AI Research Intern Task. The objective is to train a YOLO model to detect and classify 32 types of teeth in panoramic dental X-rays using the FDI numbering system.
 
 Through a series of experiments, the final and best-performing model was determined to be a **YOLOv8m** trained with strong data augmentation, achieving a final **mAP@50 of 0.905** on the held-out test set.
