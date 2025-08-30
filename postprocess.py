@@ -106,7 +106,7 @@ def main():
 
     output_image = draw_results(original_image.copy(), sorted_quadrants)
 
-    output_filename = 'postprocessing/post_processed_result(1).jpg'
+    output_filename = 'postprocessing/post_processed_result.jpg'
     cv2.imwrite(output_filename, output_image)
     print(f"\n Post-processed result saved to '{output_filename}'")
     
