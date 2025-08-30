@@ -1,6 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
+
+output_directory = 'plots'
+if not os.path.exists(output_directory):
+    os.makedirs(output_directory)
+    print(f"Created directory: '{output_directory}'")
 
 previous_best_map50 = 0.837
 
