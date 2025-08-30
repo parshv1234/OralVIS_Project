@@ -1,0 +1,16 @@
+venv/
+__pycache__/
+
+OralVis_Dataset/
+
+runs/detect/oralvis_yolov8s_run1
+runs/detect/oralvis_yolov11m_run1
+runs/detect/val 
+
+Final_Submission_Files/
+
+yolov8l.pt
+
+*.cache
+
+.DS_Store
