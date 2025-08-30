@@ -59,6 +59,21 @@ def draw_results(image, sorted_quadrants):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, colors[quad_num], 2)
     return image
 
+# --- NEW: Function to generate a text report ---
+def generate_text_report(sorted_quadrants):
+    """Generates a formatted string report of the detected teeth."""
+    report = "OralVis Analysis Report\n"
+    report += "="*25 + "\n\n"
+    for i in range(1, 5):
+        report += f"--- Quadrant {i} ---\n"
+        if sorted_quadrants[i]:
+            for tooth in sorted_quadrants[i]:
+                report += f"- {tooth['label']}\n"
+        else:
+            report += "No teeth detected in this quadrant.\n"
+        report += "\n"
+    return report
+
 # --- STREAMLIT APP ---
 st.set_page_config(layout="wide")
 st.title("🦷 OralVis: AI Dental X-Ray Analysis")
@@ -110,3 +125,32 @@ if uploaded_file is not None:
                     st.write(f"- {tooth['label']}")
             else:
                 st.write("No teeth detected.")
+
+    # --- NEW: Download Buttons ---
+    st.header("Download Results")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Prepare image for download
+        # Convert from BGR (OpenCV) to RGB for saving
+        output_image_rgb = cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB) 
+        # Encode to a byte buffer
+        is_success, buffer = cv2.imencode(".png", output_image)
+        byte_im = buffer.tobytes()
+
+        st.download_button(
+            label="Download Processed Image",
+            data=byte_im,
+            file_name=f"processed_{uploaded_file.name}.png",
+            mime="image/png"
+        )
+    
+    with col2:
+        # Prepare text report for download
+        text_report = generate_text_report(sorted_quadrants)
+        st.download_button(
+            label="Download Text Report",
+            data=text_report,
+            file_name="analysis_report.txt",
+            mime="text/plain"
+        )
