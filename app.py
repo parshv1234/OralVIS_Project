@@ -92,7 +92,7 @@ if uploaded_file is not None:
     H, W, _ = cv2_img.shape
 
     st.sidebar.header("Original Image")
-    st.sidebar.image(cv2_img, channels="BGR", use_column_width=True)
+    st.sidebar.image(cv2_img, channels="BGR", width="stretch")
 
     results = model(cv2_img)[0]
     
